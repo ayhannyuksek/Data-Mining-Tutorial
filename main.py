@@ -1,41 +1,7 @@
-import timeit
+import pandas as pd
 import warnings
 
 warnings.filterwarnings('ignore')
-import sklearn
-from numpy.random.mtrand import RandomState
-from sklearn.datasets import make_blobs
-from sklearn.model_selection import train_test_split
-from sklearn.naive_bayes import GaussianNB
-from sklearn.metrics import accuracy_score
-from sklearn.linear_model import LinearRegression, SGDClassifier
-from sklearn.linear_model import SGDRegressor
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
-import numpy as np
-from sklearn.metrics import mean_absolute_error
-from sklearn.decomposition import PCA
-from sklearn.metrics import r2_score
-from sklearn.datasets import make_classification
-import pandas as pd
-from sklearn.datasets import make_circles
-from sklearn.linear_model import LogisticRegression
-from sklearn.datasets import make_moons
-from matplotlib import pyplot as plt
-from pandas import DataFrame
-from sklearn.preprocessing import StandardScaler
-from sklearn.datasets import load_digits
-from sklearn.model_selection import train_test_split
-from sklearn.datasets import make_classification
-from sklearn.linear_model import LogisticRegression
-from sklearn.multiclass import OneVsRestClassifier
-from sklearn.metrics import confusion_matrix
-import seaborn as sns
-import time
-from sklearn.linear_model import Perceptron
-from sklearn.neural_network import MLPClassifier
-from mpl_toolkits.mplot3d import Axes3D
-from sklearn.svm import SVC
 
 # 1. Loading dataset
 dataset = pd.read_csv("survey.csv")
