@@ -5,9 +5,15 @@ import matplotlib
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.ensemble import ExtraTreesClassifier, BaggingClassifier
+from sklearn.linear_model import LogisticRegression, SGDClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import DecisionTreeClassifier
 
 warnings.filterwarnings('ignore')
 
@@ -38,7 +44,6 @@ dataset["work_interfere"].replace(["TEMP"], "Don't know", inplace=True)
 
 # Changing Age values with median if age < 18 or > 120.
 median = int(dataset["Age"].median())
-print(median)
 
 for i in range(dataset.shape[0]):
     if dataset["Age"][i] < 18 or dataset["Age"][i] > 120:
@@ -86,7 +91,7 @@ ageScaler = MinMaxScaler()
 dataset['Age'] = ageScaler.fit_transform(dataset[['Age']])
 
 # Checking whether there are any missing values or not.
-print(dataset.isnull().sum())
+# print(dataset.isnull().sum())
 
 # *** 4. Plotting charts for dataset visualization ***
 # Distribution by age.
@@ -152,7 +157,20 @@ plt.title("Feature importance's")
 plt.bar(range(21), importance[indices], color="blue", yerr=std[indices], align="center")
 plt.xticks(range(21), labels, rotation='vertical')
 plt.xlim([-1, X_importance.shape[1]])
-plt.show()
+
+
+#  6. Applying algorithms
+
+# Function for plotting confusion matrix
+def confusionMatrix(y_test, prediction, modelName):
+    plt.figure(figsize=(12, 8))
+    mat = confusion_matrix(y_test, prediction)
+    sns.heatmap(mat, square=True, annot=True, cbar=True, fmt="d")
+    plt.xlabel("Pred")
+    plt.ylabel("Real Value")
+    plt.title("Confusion Matrix of " + modelName)
+    plt.show()
+
 
 # Defining X and y.
 dataset_features = ["Age", "Gender", "self_employed", "family_history", "work_interfere", "no_employees", "remote_work",
@@ -162,3 +180,74 @@ y = dataset["treatment"]
 
 # Split X and y for training and testing.
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=0)
+
+# Logistic Regression part
+print("********* Logistic Regression *********")
+log = LogisticRegression().fit(X_train, y_train)
+log_pred = log.predict(X_test)
+log_accuracy = accuracy_score(y_test, log_pred)
+print("Accuracy score: ", log_accuracy)
+print("Real value: ", y_test.values[:30], "\nPred value: ", log_pred[:30])
+confusionMatrix(y_test, log_pred, "Logistic Regression")
+
+# AdaBoost Classifier part
+print("\n********* AdaBoost Classifier *********")
+ABC = AdaBoostClassifier(n_estimators=50).fit(X_train, y_train)
+ABC_pred = ABC.predict(X_test)
+ABC_accuracy = accuracy_score(y_test, ABC_pred)
+print("Accuracy score: ", ABC_accuracy)
+print("Real value: ", y_test.values[:30], "\nPred value: ", ABC_pred[:30])
+confusionMatrix(y_test, ABC_pred, "AdaBoost Classifier")
+
+# KNeighbors Classifier part
+print("\n********* KNeighbors Classifier *********")
+n_values = {}
+for i in range(1, 53):
+    KNC = KNeighborsClassifier(n_neighbors=i).fit(X_train, y_train)
+    KNC_pred = KNC.predict(X_test)
+    KNC_accuracy = accuracy_score(y_test, KNC_pred)
+    n_values[i] = KNC_accuracy
+
+best_n_value = max(n_values, key=n_values.get)
+KNC = KNeighborsClassifier(n_neighbors=best_n_value).fit(X_train, y_train)
+KNC_pred = KNC.predict(X_test)
+KNC_accuracy = accuracy_score(y_test, KNC_pred)
+print("Accuracy score: ", KNC_accuracy)
+print("Real value: ", y_test.values[:30], "\nPred value: ", KNC_pred[:30])
+confusionMatrix(y_test, KNC_pred, "KNeighbors Classifier")
+
+# Random Forest Classifier part
+print("\n********* Random Forest Classifier *********")
+depth_values = {}
+for i in range(1, 11):
+    RFC = RandomForestClassifier(max_depth=i).fit(X_train, y_train)
+    RFC_pred = RFC.predict(X_test)
+    RFC_accuracy = accuracy_score(y_test, RFC_pred)
+    depth_values[i] = RFC_accuracy
+
+best_depth_value = max(depth_values, key=depth_values.get)
+RFC = RandomForestClassifier(max_depth=best_depth_value).fit(X_train, y_train)
+RFC_pred = RFC.predict(X_test)
+RFC_accuracy = accuracy_score(y_test, RFC_pred)
+print("Accuracy score: ", RFC_accuracy)
+print("Real value: ", y_test.values[:30], "\nPred value: ", RFC_pred[:30])
+confusionMatrix(y_test, RFC_pred, "Random Forest Classifier")
+
+# Bagging Classifier part
+print("\n********* Bagging Classifier *********")
+node_values = {}
+for i in [500, 2000, 8000, 99999]:
+    DTC = DecisionTreeClassifier(max_leaf_nodes=i)
+    bag = BaggingClassifier(base_estimator=DTC).fit(X_train, y_train)
+    bag_pred = bag.predict(X_test)
+    bag_accuracy = accuracy_score(y_test, bag_pred)
+    node_values[i] = bag_accuracy
+
+best_node_value = max(node_values, key=node_values.get)
+DTC = DecisionTreeClassifier(max_leaf_nodes=best_node_value)
+bag = BaggingClassifier(base_estimator=DTC).fit(X_train, y_train)
+bag_pred = bag.predict(X_test)
+bag_accuracy = accuracy_score(y_test, bag_pred)
+print("Accuracy score: ", bag_accuracy)
+print("Real value: ", y_test.values[:30], "\nPred value: ", bag_pred[:30])
+confusionMatrix(y_test, bag_pred, "Bagging Classifier")
