@@ -1,12 +1,12 @@
 import pandas as pd
 import warnings
 from sklearn import preprocessing
-import matplotlib
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+from sklearn.cluster import KMeans
 from sklearn.ensemble import ExtraTreesClassifier, BaggingClassifier
-from sklearn.linear_model import LogisticRegression, SGDClassifier
+from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
@@ -188,7 +188,7 @@ log_pred = log.predict(X_test)
 log_accuracy = accuracy_score(y_test, log_pred)
 print("Accuracy score: ", log_accuracy)
 print("Real value: ", y_test.values[:30], "\nPred value: ", log_pred[:30])
-confusionMatrix(y_test, log_pred, "Logistic Regression")
+# confusionMatrix(y_test, log_pred, "Logistic Regression")
 
 # AdaBoost Classifier part
 print("\n********* AdaBoost Classifier *********")
@@ -197,7 +197,7 @@ ABC_pred = ABC.predict(X_test)
 ABC_accuracy = accuracy_score(y_test, ABC_pred)
 print("Accuracy score: ", ABC_accuracy)
 print("Real value: ", y_test.values[:30], "\nPred value: ", ABC_pred[:30])
-confusionMatrix(y_test, ABC_pred, "AdaBoost Classifier")
+# confusionMatrix(y_test, ABC_pred, "AdaBoost Classifier")
 
 # KNeighbors Classifier part
 print("\n********* KNeighbors Classifier *********")
@@ -214,7 +214,7 @@ KNC_pred = KNC.predict(X_test)
 KNC_accuracy = accuracy_score(y_test, KNC_pred)
 print("Accuracy score: ", KNC_accuracy)
 print("Real value: ", y_test.values[:30], "\nPred value: ", KNC_pred[:30])
-confusionMatrix(y_test, KNC_pred, "KNeighbors Classifier")
+# confusionMatrix(y_test, KNC_pred, "KNeighbors Classifier")
 
 # Random Forest Classifier part
 print("\n********* Random Forest Classifier *********")
@@ -231,7 +231,7 @@ RFC_pred = RFC.predict(X_test)
 RFC_accuracy = accuracy_score(y_test, RFC_pred)
 print("Accuracy score: ", RFC_accuracy)
 print("Real value: ", y_test.values[:30], "\nPred value: ", RFC_pred[:30])
-confusionMatrix(y_test, RFC_pred, "Random Forest Classifier")
+# confusionMatrix(y_test, RFC_pred, "Random Forest Classifier")
 
 # Bagging Classifier part
 print("\n********* Bagging Classifier *********")
@@ -250,4 +250,16 @@ bag_pred = bag.predict(X_test)
 bag_accuracy = accuracy_score(y_test, bag_pred)
 print("Accuracy score: ", bag_accuracy)
 print("Real value: ", y_test.values[:30], "\nPred value: ", bag_pred[:30])
-confusionMatrix(y_test, bag_pred, "Bagging Classifier")
+# confusionMatrix(y_test, bag_pred, "Bagging Classifier")
+
+# 7. Comparison Graph of Algorithms by Accuracy Score
+fig, ax = plt.subplots(figsize=(16, 9))
+print(" ")
+models = ["Logistic Regression", "AdaBoost Classifier", "KNeighbors Classifier", "Random Forest Classifier", "Bagging Classifier"]
+success = [log_accuracy * 100, ABC_accuracy * 100, KNC_accuracy * 100, RFC_accuracy * 100, bag_accuracy * 100]
+ax.bar(models, success)
+ax.grid(b=True, color='grey', linestyle='-.', linewidth=0.5, alpha=0.2)
+for i in range(0, 5):
+    print(models[i] + ":", success[i])
+
+
