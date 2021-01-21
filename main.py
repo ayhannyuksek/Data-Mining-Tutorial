@@ -4,7 +4,6 @@ from sklearn import preprocessing
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-from sklearn.cluster import KMeans
 from sklearn.ensemble import ExtraTreesClassifier, BaggingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, confusion_matrix
@@ -14,6 +13,7 @@ from sklearn.ensemble import AdaBoostClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
+
 
 warnings.filterwarnings('ignore')
 
@@ -32,21 +32,21 @@ dataset = dataset.drop(["obs_consequence"], axis=1)
 
 # Changing missing (NA) values with TEMP.
 dataset = dataset.fillna("TEMP")
-'''print(dataset.iloc[0])'''
+print(dataset.iloc[0])
 
 # Changing 'self_employed' values with 'No'.
 dataset["self_employed"].replace(["TEMP"], "No", inplace=True)
-'''print(dataset["self_employed"])
-print(dataset["self_employed"].unique())'''
+print(dataset["self_employed"])
+print(dataset["self_employed"].unique())
 
 # Changing 'work_interfere' with 'Don't know'
 dataset["work_interfere"].replace(["TEMP"], "Don't know", inplace=True)
 
-# Changing Age values with median if age < 18 or > 120.
+# Changing Age values with median if age < 18 or > 100.
 median = int(dataset["Age"].median())
 
 for i in range(dataset.shape[0]):
-    if dataset["Age"][i] < 18 or dataset["Age"][i] > 120:
+    if dataset["Age"][i] < 18 or dataset["Age"][i] > 100:
         dataset["Age"][i] = median
 
 # Creating age_range feature.
@@ -54,12 +54,11 @@ dataset['age_range'] = pd.cut(dataset['Age'], [0, 20, 30, 65, 100], labels=["0-2
                               include_lowest=True)
 
 # Creating 3 arrays for genders (male, female, trans).
-male = ["male", "m", "male-ish", "maile", "mal", "male (cis)", "make", "male ", "man", "msle", "mail", "malr",
-        "cis man", "cis male", "p"]
-female = ["cis female", "f", "female", "woman", "femake", "female ", "cis-female/femme", "female (cis)", "femail",
+male = ["msle", "mail", "malr",
+        "cis man", "cis male", "p""male", "m", "male-ish", "maile", "mal", "male (cis)", "make", "male ", "man"]
+female = ["female", "woman", "femake", "female ","cis female", "f",  "cis-female/femme", "female (cis)", "femail",
           "a little about you"]
-trans = ["trans-female", "something kinda male?", "queer/she/they", "non-binary", "nah", "all", "enby", "fluid",
-         "genderqueer",
+trans = ["non-binary", "nah", "all", "enby", "fluid","genderqueer","trans-female", "something kinda male?", "queer/she/they",
          "androgyne", "agender", "male leaning androgynous", "guy (-ish) ^_^", "trans woman", "neuter",
          "female (trans)", "queer", "ostensibly male, unsure what that really means"]
 
@@ -69,15 +68,13 @@ dataset["Gender"] = dataset["Gender"].str.lower()
 for i in range(dataset.shape[0]):
     if dataset["Gender"][i] in male:
         dataset["Gender"][i] = "male"
-
     elif dataset["Gender"][i] in female:
         dataset["Gender"][i] = "female"
-
     elif dataset["Gender"][i] in trans:
         dataset["Gender"][i] = "trans"
 
 # *** 3. Encoding dataset ***
-# Backup dataset beforec encoding for graphs.
+# Backup dataset before encoding for graphs.
 backupDataset = dataset.copy()
 
 # Encoding dataset with LabelEncoder.
@@ -129,7 +126,7 @@ sns.catplot(x="family_history", y="treatment", hue="Gender", data=dataset, kind=
 plt.title('Mental Health Condition by Family History And Gender')
 plt.xlabel('Family History')
 
-# Mental health condition by agerange.
+# Mental health condition by age range.
 sns.catplot(x="age_range", y="treatment", hue="Gender", data=dataset, kind="bar", ci=None).set_xticklabels(
     ["0-20", "21-30", "31-65", "66-100"])
 plt.title('Mental Health Condition by Age Range')
@@ -159,8 +156,7 @@ plt.xticks(range(21), labels, rotation='vertical')
 plt.xlim([-1, X_importance.shape[1]])
 
 
-#  6. Applying algorithms
-
+# *** 6. Applying algorithms ***
 # Function for plotting confusion matrix
 def confusionMatrix(y_test, prediction, modelName):
     plt.figure(figsize=(12, 8))
@@ -188,7 +184,7 @@ log_pred = log.predict(X_test)
 log_accuracy = accuracy_score(y_test, log_pred)
 print("Accuracy score: ", log_accuracy)
 print("Real value: ", y_test.values[:30], "\nPred value: ", log_pred[:30])
-# confusionMatrix(y_test, log_pred, "Logistic Regression")
+confusionMatrix(y_test, log_pred, "Logistic Regression")
 
 # AdaBoost Classifier part
 print("\n********* AdaBoost Classifier *********")
@@ -197,7 +193,7 @@ ABC_pred = ABC.predict(X_test)
 ABC_accuracy = accuracy_score(y_test, ABC_pred)
 print("Accuracy score: ", ABC_accuracy)
 print("Real value: ", y_test.values[:30], "\nPred value: ", ABC_pred[:30])
-# confusionMatrix(y_test, ABC_pred, "AdaBoost Classifier")
+confusionMatrix(y_test, ABC_pred, "AdaBoost Classifier")
 
 # KNeighbors Classifier part
 print("\n********* KNeighbors Classifier *********")
@@ -214,7 +210,7 @@ KNC_pred = KNC.predict(X_test)
 KNC_accuracy = accuracy_score(y_test, KNC_pred)
 print("Accuracy score: ", KNC_accuracy)
 print("Real value: ", y_test.values[:30], "\nPred value: ", KNC_pred[:30])
-# confusionMatrix(y_test, KNC_pred, "KNeighbors Classifier")
+confusionMatrix(y_test, KNC_pred, "KNeighbors Classifier")
 
 # Random Forest Classifier part
 print("\n********* Random Forest Classifier *********")
@@ -231,7 +227,7 @@ RFC_pred = RFC.predict(X_test)
 RFC_accuracy = accuracy_score(y_test, RFC_pred)
 print("Accuracy score: ", RFC_accuracy)
 print("Real value: ", y_test.values[:30], "\nPred value: ", RFC_pred[:30])
-# confusionMatrix(y_test, RFC_pred, "Random Forest Classifier")
+confusionMatrix(y_test, RFC_pred, "Random Forest Classifier")
 
 # Bagging Classifier part
 print("\n********* Bagging Classifier *********")
@@ -250,16 +246,19 @@ bag_pred = bag.predict(X_test)
 bag_accuracy = accuracy_score(y_test, bag_pred)
 print("Accuracy score: ", bag_accuracy)
 print("Real value: ", y_test.values[:30], "\nPred value: ", bag_pred[:30])
-# confusionMatrix(y_test, bag_pred, "Bagging Classifier")
+confusionMatrix(y_test, bag_pred, "Bagging Classifier")
 
-# 7. Comparison Graph of Algorithms by Accuracy Score
+# *** 7. Comparison graph of algorithms by accuracy score ***
 fig, ax = plt.subplots(figsize=(16, 9))
 print(" ")
-models = ["Logistic Regression", "AdaBoost Classifier", "KNeighbors Classifier", "Random Forest Classifier", "Bagging Classifier"]
+models = ["Logistic Regression", "AdaBoost Classifier", "KNeighbors Classifier", "Random Forest Classifier"
+, "Bagging Classifier"]
+plt.ylabel("Accuracy Score")
 success = [log_accuracy * 100, ABC_accuracy * 100, KNC_accuracy * 100, RFC_accuracy * 100, bag_accuracy * 100]
 ax.bar(models, success)
 ax.grid(b=True, color='grey', linestyle='-.', linewidth=0.5, alpha=0.2)
 for i in range(0, 5):
     print(models[i] + ":", success[i])
 
+plt.show()
 
