@@ -1,6 +1,6 @@
 # DataMiningFinalProject
 
-Project's Description: This project aims to predict whether the patients in the tech workplace should be treated or not according to survey applied in 2014. Also we
+Project's Description:  <br/>This project aims to predict whether the patients in the tech workplace should be treated or not according to survey applied in 2014. Also we
 try to determine the most accurate algorithm. <br/>
 
 Team & Roles:<br/>
