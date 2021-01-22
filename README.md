@@ -1,21 +1,21 @@
 # DataMiningFinalProject
 
-Project's Description: This project aims to predict whether the patients in the tech workplace should be treated or not according to survey applied in 2014. Also we 
-try to determine the most accurate algorithm.
+Project's Description: This project aims to predict whether the patients in the tech workplace should be treated or not according to survey applied in 2014. Also we
+try to determine the most accurate algorithm. <br/>
 
-Team & Roles: 
-Team members: Ayhan Yüksek, Ümit Kadiroğlu
-Data preprocessing operations: Ayhan Yüksek
-Visualization of dataset: Ümit Kadiroğlu
-Applying algoritms: Ayhan Yüksek and Ümit Kadiroğlu
-Project's report: Ayhan Yüksek and Ümit Kadiroğlu
+Team & Roles:<br/>
+Team members: Ayhan Yüksek, Ümit Kadiroğlu <br/>
+Data preprocessing operations: Ayhan Yüksek <br/>
+Visualization of dataset: Ümit Kadiroğlu <br/>
+Applying algoritms: Ayhan Yüksek and Ümit Kadiroğlu <br/>
+Project's report: Ayhan Yüksek and Ümit Kadiroğlu <br/>
 
-Structure:
-/fig: enviromental dependencies for report.
-/figurs_pdf: directory for saving figures as pdf.
-Report.tex: latex source code of project's report.
-main.py: main file.
-survey.csv: dataset file.
-requirements.txt: dependencies of project for interpreting by Python 3.8.
+Structure: <br/>
+/fig: enviromental dependencies for report. <br/>
+/figurs_pdf: directory for saving figures as pdf. <br/>
+Report.tex: latex source code of project's report. <br/>
+main.py: main file. <br/>
+survey.csv: dataset file. <br/>
+requirements.txt: dependencies of project for interpreting by Python 3.8. <br/>
 
-Language, version, and main file: Python 3.8,  main.py 
+Language, version, and main file: Python 3.8,  main.py
