@@ -4,6 +4,7 @@ Project's Description:  <br/>This project aims to predict whether the patients i
 try to determine the most accurate algorithm. <br/>
 
 Team & Roles:<br/>
+Team alias: Templar
 Team members: Ayhan Yüksek, Ümit Kadiroğlu <br/>
 Data preprocessing operations: Ayhan Yüksek <br/>
 Visualization of dataset: Ümit Kadiroğlu <br/>
