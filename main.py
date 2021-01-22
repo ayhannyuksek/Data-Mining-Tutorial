@@ -14,15 +14,14 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 
-
 warnings.filterwarnings('ignore')
 
 # *** 1. Loading dataset ***
 dataset = pd.read_csv("survey.csv")
-print(dataset.shape)
+print("Shape of dataset:", dataset.shape)
 
 # *** 2. Cleaning our dataset ***
-# Delete some of the features that we don't want to use.
+# Deleting some of the features that we don't want to use.
 dataset = dataset.drop(["Timestamp"], axis=1)
 dataset = dataset.drop(["state"], axis=1)
 dataset = dataset.drop(["comments"], axis=1)
@@ -32,18 +31,19 @@ dataset = dataset.drop(["obs_consequence"], axis=1)
 
 # Changing missing (NA) values with TEMP.
 dataset = dataset.fillna("TEMP")
-print(dataset.iloc[0])
+'''print(dataset.iloc[0])'''  # we checked the first values of each features.
 
 # Changing 'self_employed' values with 'No'.
 dataset["self_employed"].replace(["TEMP"], "No", inplace=True)
-print(dataset["self_employed"])
-print(dataset["self_employed"].unique())
+print("\nUnique values of self_employed after changing NA values:", dataset["self_employed"].unique())  # we checked the unique values of self_employed.
 
 # Changing 'work_interfere' with 'Don't know'
 dataset["work_interfere"].replace(["TEMP"], "Don't know", inplace=True)
+print("\nUnique values of work_interfere after changing NA values:", dataset["work_interfere"].unique())  # we checked the unique values of work_interfere.
 
 # Changing Age values with median if age < 18 or > 100.
 median = int(dataset["Age"].median())
+print("\nMedian of age:", median)
 
 for i in range(dataset.shape[0]):
     if dataset["Age"][i] < 18 or dataset["Age"][i] > 100:
@@ -55,13 +55,15 @@ dataset['age_range'] = pd.cut(dataset['Age'], [0, 20, 30, 65, 100], labels=["0-2
 
 # Creating 3 arrays for genders (male, female, trans).
 male = ["msle", "mail", "malr",
-        "cis man", "cis male", "p""male", "m", "male-ish", "maile", "mal", "male (cis)", "make", "male ", "man"]
-female = ["female", "woman", "femake", "female ","cis female", "f",  "cis-female/femme", "female (cis)", "femail",
+        "cis man", "cis male", "p","male", "m", "male-ish", "maile", "mal", "male (cis)", "make", "male ", "man"]
+female = ["female", "woman", "femake", "female ", "cis female", "f", "cis-female/femme", "female (cis)", "femail",
           "a little about you"]
-trans = ["non-binary", "nah", "all", "enby", "fluid","genderqueer","trans-female", "something kinda male?", "queer/she/they",
+trans = ["non-binary", "nah", "all", "enby", "fluid", "genderqueer", "trans-female", "something kinda male?",
+         "queer/she/they",
          "androgyne", "agender", "male leaning androgynous", "guy (-ish) ^_^", "trans woman", "neuter",
          "female (trans)", "queer", "ostensibly male, unsure what that really means"]
 
+# We lowered gender values for easier comparison
 dataset["Gender"] = dataset["Gender"].str.lower()
 
 # Decreasing gender values to male, female, trans.
@@ -88,14 +90,14 @@ ageScaler = MinMaxScaler()
 dataset['Age'] = ageScaler.fit_transform(dataset[['Age']])
 
 # Checking whether there are any missing values or not.
-# print(dataset.isnull().sum())
+print("\nChecking the number of null values of each feature after data pre-processing:")
+print(dataset.isnull().sum())
 
 # *** 4. Plotting charts for dataset visualization ***
-# Distribution by age.
+# Creating a chart for distribution by age.
 mu = backupDataset["Age"].mean()
 sigma = backupDataset["Age"].std()
 num_bins = backupDataset["Age"].unique().size
-
 fig, ax = plt.subplots()
 n, bins, patches = ax.hist(backupDataset["Age"], num_bins, density=True)
 y = ((1 / (np.sqrt(2 * np.pi) * sigma)) *
@@ -104,8 +106,9 @@ ax.plot(bins, y, '--')
 ax.set_xlabel('Age')
 ax.set_title("Distribution by Age")
 fig.tight_layout()
+plt.savefig("figures_pdf/Distribution_by_Age.pdf")
 
-# Distribution by gender.
+# Creating a chart for distribution by gender.
 trans = 0
 female = 0
 male = 0
@@ -120,19 +123,23 @@ for i in backupDataset["Gender"]:
 fig1, ax1 = plt.subplots()
 ax1.pie([male, female, trans], labels=["male", "female", "trans"], autopct='%1.1f%%')
 plt.title("Distribution by gender")
+plt.savefig("figures_pdf/Distribution_by_gender.pdf")
 
-# Mental health condition by family history and gender.
+# Creating a chart for mental health condition by family history and gender.
 sns.catplot(x="family_history", y="treatment", hue="Gender", data=dataset, kind="bar").set_xticklabels(["NO", "YES"])
 plt.title('Mental Health Condition by Family History And Gender')
 plt.xlabel('Family History')
+plt.savefig("figures_pdf/Mental_Health_Condition_by_Family_History_And_Gender.pdf")
 
-# Mental health condition by age range.
+# Creating a chart for mental health condition by age range.
 sns.catplot(x="age_range", y="treatment", hue="Gender", data=dataset, kind="bar", ci=None).set_xticklabels(
     ["0-20", "21-30", "31-65", "66-100"])
 plt.title('Mental Health Condition by Age Range')
 plt.xlabel('Age range')
+plt.savefig("figures_pdf/Mental_Health_Condition_by_Age_Range.pdf")
 
 # *** 5. Determining feature importance ***
+# We made this part because instead of using every feature we wanted to use the most important ones.
 # Defining X and y for feature importance.
 X_importance = dataset.drop(["treatment"], axis=1)
 y_importance = dataset["treatment"]
@@ -142,8 +149,8 @@ ETC = ExtraTreesClassifier(n_estimators=300, random_state=0).fit(X_importance, y
 importance = ETC.feature_importances_
 std = np.std([tree.feature_importances_ for tree in ETC.estimators_], axis=0)
 indices = np.argsort(importance)[::-1]
-
 labels = []
+
 for col in dataset.columns:
     if col == "treatment":
         continue
@@ -154,10 +161,11 @@ plt.title("Feature importance's")
 plt.bar(range(21), importance[indices], color="blue", yerr=std[indices], align="center")
 plt.xticks(range(21), labels, rotation='vertical')
 plt.xlim([-1, X_importance.shape[1]])
+plt.savefig("figures_pdf/Feature_importance's.pdf")
 
 
 # *** 6. Applying algorithms ***
-# Function for plotting confusion matrix
+# Function for plotting confusion matrix.
 def confusionMatrix(y_test, prediction, modelName):
     plt.figure(figsize=(12, 8))
     mat = confusion_matrix(y_test, prediction)
@@ -165,20 +173,20 @@ def confusionMatrix(y_test, prediction, modelName):
     plt.xlabel("Pred")
     plt.ylabel("Real Value")
     plt.title("Confusion Matrix of " + modelName)
-    plt.show()
+    plt.savefig("figures_pdf/Confusion_matrix_of %s.pdf" % modelName)
 
 
 # Defining X and y.
 dataset_features = ["Age", "Gender", "self_employed", "family_history", "work_interfere", "no_employees", "remote_work",
                     "benefits", "care_options"]
 X = dataset[dataset_features]
-y = dataset["treatment"]
+y = dataset["treatment"]  # Ground truth vector.
 
 # Split X and y for training and testing.
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=0)
 
 # Logistic Regression part
-print("********* Logistic Regression *********")
+print("\n********* Logistic Regression *********")
 log = LogisticRegression().fit(X_train, y_train)
 log_pred = log.predict(X_test)
 log_accuracy = accuracy_score(y_test, log_pred)
@@ -197,6 +205,7 @@ confusionMatrix(y_test, ABC_pred, "AdaBoost Classifier")
 
 # KNeighbors Classifier part
 print("\n********* KNeighbors Classifier *********")
+# To create the best prediction value, we wanted to determine the best parameters.
 n_values = {}
 for i in range(1, 53):
     KNC = KNeighborsClassifier(n_neighbors=i).fit(X_train, y_train)
@@ -214,6 +223,7 @@ confusionMatrix(y_test, KNC_pred, "KNeighbors Classifier")
 
 # Random Forest Classifier part
 print("\n********* Random Forest Classifier *********")
+# To create the best prediction value, we wanted to determine the best parameters.
 depth_values = {}
 for i in range(1, 11):
     RFC = RandomForestClassifier(max_depth=i).fit(X_train, y_train)
@@ -231,6 +241,7 @@ confusionMatrix(y_test, RFC_pred, "Random Forest Classifier")
 
 # Bagging Classifier part
 print("\n********* Bagging Classifier *********")
+# To create the best prediction value, we wanted to determine the best parameters.
 node_values = {}
 for i in [500, 2000, 8000, 99999]:
     DTC = DecisionTreeClassifier(max_leaf_nodes=i)
@@ -252,13 +263,16 @@ confusionMatrix(y_test, bag_pred, "Bagging Classifier")
 fig, ax = plt.subplots(figsize=(16, 9))
 print(" ")
 models = ["Logistic Regression", "AdaBoost Classifier", "KNeighbors Classifier", "Random Forest Classifier"
-, "Bagging Classifier"]
+    , "Bagging Classifier"]
 plt.ylabel("Accuracy Score")
+plt.title("Comparison graph of algorithms by accuracy score")
 success = [log_accuracy * 100, ABC_accuracy * 100, KNC_accuracy * 100, RFC_accuracy * 100, bag_accuracy * 100]
 ax.bar(models, success)
 ax.grid(b=True, color='grey', linestyle='-.', linewidth=0.5, alpha=0.2)
+print("\nAccuracy scores of each algorithm:")
 for i in range(0, 5):
     print(models[i] + ":", success[i])
 
-plt.show()
+plt.savefig("figures_pdf/Comparison_graph.pdf")
+print("\nAll figures have been saved into the figures_pdf file.")
 
